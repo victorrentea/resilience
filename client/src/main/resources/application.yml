@@ -1,0 +1,40 @@
+logging.pattern.level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+management.endpoints.web.exposure.include: "*"
+management.endpoint.health.show-details: always
+
+resilience4j:
+  ratelimiter:
+    instances:
+      rate:
+        limit-for-period: 3 # no calls
+        limit-refresh-period: 1s # .. per unit of time
+        timeout-duration: 0ms # how much to allow calls to wait in line
+
+  bulkhead:
+    configs:
+      default: # default for any bulkhead
+        max-concurrent-calls: 2
+        max-wait-duration: 0ms # how much to allow calls to wait in line
+
+  retry:
+    instances:
+      retry:
+#        retry-exception-predicate: victor.training.resilience.client.RetryPredicate
+        max-attempts: 2
+        retry-exceptions:
+          - org.springframework.web.reactive.function.client.WebClientResponseException.InternalServerError
+
+  circuitbreaker:
+    instances:
+      circuit:
+        sliding-window-size: 5
+        sliding-window-type: count_based
+
+        wait-duration-in-open-state: 2s
+
+        permitted-number-of-calls-in-half-open-state: 1
+spring:
+  cache:
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=3s
