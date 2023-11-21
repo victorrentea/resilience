@@ -43,8 +43,8 @@ public class ServerApp {
   @GetMapping("fail-half")
   public String failHalf() {
     if (Math.random() < .5) {
-      throw new IllegalArgumentException("FATAL ERROR: DON'T RETRY, eg invalid request parameters!");
-//      throw new RuntimeException("RETRYABLE ERROR, eg downstream system failed, optimistic locking error");
+//      throw new IllegalArgumentException("FATAL ERROR: DON'T RETRY, eg invalid request parameters!");
+      throw new RuntimeException("RETRYABLE ERROR, eg downstream system failed, optimistic locking error");
 //      throw new RetryableException(); // explicit error response body
     } else {
       return "OK " + LocalDateTime.now();
