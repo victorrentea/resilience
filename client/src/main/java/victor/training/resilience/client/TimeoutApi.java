@@ -27,7 +27,10 @@ public class TimeoutApi {
     return webClient.get().uri("http://localhost:8081/timeout")
         .httpRequest(httpRequest -> {
           HttpClientRequest nativeRequest = httpRequest.getNativeRequest();
-          nativeRequest.responseTimeout(Duration.ofMillis(500));
+          nativeRequest.responseTimeout(Duration.ofMillis(5000)); // READ timeout, default = infinite
+          // - too short => requests taking longer that 500ms can suceed, but client see errors
+          // - too long => keep your resources blocked + longer response to YOUR clients
+          // connect timeout = handshake 3ms. set it via HttpClient
         })
         .retrieve()
         .bodyToMono(String.class)

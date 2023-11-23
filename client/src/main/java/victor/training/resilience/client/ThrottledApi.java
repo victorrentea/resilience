@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Random;
@@ -22,7 +23,7 @@ import static java.time.Duration.ofSeconds;
 public class ThrottledApi {
   private final BulkheadRegistry bulkheadRegistry;
 
-  @GetMapping("throttled")
+  @GetMapping("throttled") // throttling = limit the volume of concurrent requests
   public Mono<String> throttled() {
     Bulkhead globalBulkhead = bulkheadRegistry.bulkhead("bulkhead");
     return protectedCall()
@@ -42,8 +43,8 @@ public class ThrottledApi {
     // - requestDto.region, ...
 
     Bulkhead perTenantBulkhead = bulkheadRegistry.bulkhead("bulkhead-" + tenantId);
-
     return protectedCall()
+
         .doOnSubscribe(__ -> log.info("CALL-START: " + tenantId))
         .doOnNext(__ -> log.info("CALL-END: " + tenantId))
         .transformDeferred(BulkheadOperator.of(perTenantBulkhead))

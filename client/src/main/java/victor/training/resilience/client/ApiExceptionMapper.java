@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiExceptionMapper {
   @ExceptionHandler(BulkheadFullException.class)
-  @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-  // @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS) // if limiting per-client
+//  @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+   @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS) //429 Too Many Requests if limiting per-client
   public String onBulkhead() {
     return "Please try again later";
   }
