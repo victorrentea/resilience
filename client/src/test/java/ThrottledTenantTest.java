@@ -13,7 +13,7 @@ public class ThrottledTenantTest extends Simulation {
   {
     setUp(scenario(getClass().getSimpleName())
         .exec(http("").get("/throttled-tenant"))
-        .injectClosed(constantConcurrentUsers(5).during(ofSeconds(5))))
+        .injectClosed(constantConcurrentUsers(3).during(ofSeconds(5))))
         .protocols(http.baseUrl("http://localhost:8080"))
         .assertions(global().successfulRequests().percent().gt(99.0));
   }

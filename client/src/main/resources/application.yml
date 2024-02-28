@@ -1,5 +1,4 @@
-logging.pattern.level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
-
+#logging.pattern.level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 management.endpoints.web.exposure.include: "*"
 management.endpoint.health.show-details: always
 
@@ -8,8 +7,8 @@ resilience4j:
     instances:
       rate:
         limit-for-period: 3 # no calls
-        limit-refresh-period: 1s # .. per unit of time
-        timeout-duration: 0ms # how much to allow calls to wait in line
+        limit-refresh-period: 1m # .. per unit of time
+        timeout-duration: 0ms # how much to block calling thread until exception
 
   bulkhead:
     configs:
@@ -20,10 +19,10 @@ resilience4j:
   retry:
     instances:
       retry:
-#        retry-exception-predicate: victor.training.resilience.client.RetryPredicate
+#        retry-exception-predicate: victor.training.resilience.client.reactive.RetryPredicate
         max-attempts: 2
-        retry-exceptions:
-          - org.springframework.web.reactive.function.client.WebClientResponseException.InternalServerError
+#        retry-exceptions:
+#          - org.springframework.web.reactive.function.client.WebClientResponseException.InternalServerError
 
   circuitbreaker:
     instances:
@@ -38,3 +37,6 @@ spring:
   cache:
     caffeine:
       spec: maximumSize=100,expireAfterWrite=3s
+logging:
+  pattern:
+    dateformat: "HH:mm:ss.SSS"

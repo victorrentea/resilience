@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
-import static java.time.Duration.ofSeconds;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,12 +29,12 @@ public class ServerApp {
   }
 
   @GetMapping("timeout")
-  public Mono<String> timeout() {
+  public String timeout() throws InterruptedException {
     if (Math.random() < .5) {
-      return Mono.just("fast");
+      return "fast";
     } else {
-      return Mono.just("slow")
-          .delayElement(ofSeconds(3));
+      Thread.sleep(3000);
+      return "slow";
     }
   }
 
@@ -44,7 +42,7 @@ public class ServerApp {
   public String failHalf() {
     if (Math.random() < .5) {
 //      throw new IllegalArgumentException("FATAL ERROR: DON'T RETRY, eg invalid request parameters!");
-      throw new RuntimeException("RETRYABLE ERROR, eg downstream system failed, optimistic locking error");
+      throw new RuntimeException("RETRYABLE ERROR, eg: downstream system failed, optimistic locking error");
 //      throw new RetryableException(); // explicit error response body
     } else {
       return "OK " + LocalDateTime.now();
@@ -58,6 +56,7 @@ public class ServerApp {
   }
 
   static class RetryableException extends RuntimeException { }
+
   @ExceptionHandler(RetryableException.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public String retryableError() {

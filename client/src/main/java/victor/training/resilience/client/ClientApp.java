@@ -14,9 +14,11 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Hooks;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
 @Observed
 @Slf4j
@@ -27,22 +29,30 @@ import reactor.core.publisher.Hooks;
 @EnableCaching
 public class ClientApp {
   public static void main(String[] args) {
-    Hooks.enableAutomaticContextPropagation();
+//    Hooks.enableAutomaticContextPropagation();
     SpringApplication.run(ClientApp.class, args);
   }
 
+//  @Bean
+//  public WebClient webClient() {
+//    return WebClient.builder().build();
+//  }
+
   @Bean
-  public WebClient webClient() {
-    return WebClient.builder().build();
+  public RestClient restClient() {
+    RestTemplate restTemplate = new RestTemplate();
+    ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setConnectTimeout(100);
+    ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setReadTimeout(2000);
+    return RestClient.create(restTemplate);
   }
 
 
   private final CacheManager cacheManager;
   @EventListener(ApplicationStartedEvent.class)
-  public void method() throws InterruptedException {
+  @Async
+  public void checkCacheAutoEviction() throws InterruptedException {
     Cache cache = cacheManager.getCache("previous-response");
-    cache.clear();
-
+//    cache.clear();
     cache.put("k", "value");
     System.out.println(cache.get("k", String.class));
     Thread.sleep(4000);
