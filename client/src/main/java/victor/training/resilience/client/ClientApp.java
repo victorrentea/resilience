@@ -2,6 +2,8 @@ package victor.training.resilience.client;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.micrometer.observation.annotation.Observed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -16,9 +18,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 
 @Observed
 @Slf4j
@@ -43,9 +48,22 @@ public class ClientApp {
     RestTemplate restTemplate = new RestTemplate();
     ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setConnectTimeout(100);
     ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setReadTimeout(2000);
+    // = waiting time in queue on server to get a thread to work the request on
+    // + server processing time (API calls, DB ...)👑👑👑
+    // + serizalizing the response
+    // + network transfer <->
+    // until server closes the connection
+
+
+    // to keep a bidirectional conn between client-server (eg chat)
+    // we use WebSockets, Long polling (90s), Content-Type: text/event-stream
     return RestClient.create(restTemplate);
   }
 
+//  @GetMapping
+//  public void method(HttpServletResponse response) throws IOException {
+//    response.getWriter().write("Data");
+//  }
 
   private final CacheManager cacheManager;
   @EventListener(ApplicationStartedEvent.class)

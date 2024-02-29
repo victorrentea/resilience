@@ -13,14 +13,16 @@ resilience4j:
   bulkhead:
     configs:
       default: # default for any bulkhead
+
         max-concurrent-calls: 2
         max-wait-duration: 0ms # how much to allow calls to wait in line
 
   retry:
     instances:
       retry:
-#        retry-exception-predicate: victor.training.resilience.client.reactive.RetryPredicate
+#        retry-exception-predicate: victor.training.resilience.client.imperative.RetryPredicate
         max-attempts: 2
+
 #        retry-exceptions:
 #          - org.springframework.web.reactive.function.client.WebClientResponseException.InternalServerError
 
@@ -36,7 +38,7 @@ resilience4j:
 spring:
   cache:
     caffeine:
-      spec: maximumSize=100,expireAfterWrite=3s
+      spec: maximumSize=100,expireAfterWrite=2s
 logging:
   pattern:
     dateformat: "HH:mm:ss.SSS"

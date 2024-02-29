@@ -17,12 +17,12 @@ public class ThrottledApi {
   private final BulkheadRegistry bulkheadRegistry;
 
   @GetMapping("throttled") // throttling = limit the number of concurrent requests
-//  @Bulkhead(name = "bulkhead")
+//  @Bulkhead(name = "bulkhead") // AOP proxies
   public String throttled() {
     var globalBulkhead = bulkheadRegistry.bulkhead("bulkhead");
-    return globalBulkhead.executeSupplier(() -> {
+    return globalBulkhead.executeSupplier(() -> { // FP solution
       log.info("CALL-START");
-      String r = protectedCall();
+      var r=  protectedCall();
       log.info("CALL-END");
       return r;
     });
@@ -30,13 +30,13 @@ public class ThrottledApi {
 
   @GetMapping("throttled-tenant")
   public String throttledTenant() {
-    int tenantId = new Random().nextInt(2);
+    int user = new Random().nextInt(2);
     // Imagine tenant-id comes from:
     // - @RequestHeader("x-tenant-id")
     // - client-api-key
     // - requestDto.region, ...
 
-    var perTenantBulkhead = bulkheadRegistry.bulkhead("bulkhead-" + tenantId);
+    var perTenantBulkhead = bulkheadRegistry.bulkhead("bulkhead-" + user);
 
     return perTenantBulkhead.executeSupplier(() -> {
       log.info("CALL-START");
@@ -52,7 +52,7 @@ public class ThrottledApi {
     // - webClient...retrieve()
     // - repo.find/insert
     // - redis, kafka, mongo...
-    Thread.sleep(1000);
+    Thread.sleep(10000);
     return "throttled-call";
   }
 }

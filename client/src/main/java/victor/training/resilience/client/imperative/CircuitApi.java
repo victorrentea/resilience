@@ -2,6 +2,8 @@ package victor.training.resilience.client.imperative;//package victor.training.r
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.circuitbreaker.event.CircuitBreakerEvent;
+import io.github.resilience4j.core.EventConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,12 @@ public class CircuitApi {
   @GetMapping("circuit")
   public String circuit() {
     CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuit");
+//    circuitBreaker.getEventPublisher().onEvent(new EventConsumer<CircuitBreakerEvent>() {
+//      @Override
+//      public void consumeEvent(CircuitBreakerEvent event) {
+//        event
+//      }
+//    });
     return circuitBreaker.executeSupplier(() ->
         restClient.get()
             .uri("http://localhost:8081/fail-half")
