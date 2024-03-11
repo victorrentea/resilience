@@ -19,7 +19,7 @@ resilience4j:
   retry:
     instances:
       retry1:
-#        retry-exception-predicate: victor.training.resilience.client.imperative.RetryPredicate
+        retry-exception-predicate: victor.training.resilience.blocking.RetryDemo.RetryPredicate
         max-attempts: 2
 
         retry-exceptions:

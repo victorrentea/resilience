@@ -71,6 +71,7 @@ public class RetryDemo {
 
     @Override
     public boolean test(Throwable throwable) {
+      System.out.println("Check : " + throwable);
       return false;
     }
 
