@@ -1,4 +1,4 @@
-package victor.training.resilience.client.imperative;//package victor.training.resilience.client.reactive;
+package victor.training.resilience.client.blocking;//package victor.training.resilience.client.reactive;
 
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;

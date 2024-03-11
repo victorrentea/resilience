@@ -1,4 +1,4 @@
-package victor.training.resilience.client.imperative;
+package victor.training.resilience.client.blocking;
 
 import java.util.function.Predicate;
 

@@ -46,14 +46,14 @@ public class ClientApp {
   @Bean
   public RestClient restClient() {
     RestTemplate restTemplate = new RestTemplate();
-    ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setConnectTimeout(100);
-    ((SimpleClientHttpRequestFactory)restTemplate.getRequestFactory()).setReadTimeout(2000);
+    var requestFactory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
+    requestFactory.setConnectTimeout(20); // = time to wait for TCP/IP handshake = time to wait for server to accept the connection
+    requestFactory.setReadTimeout(30000); // aka 'response timeout'
     // = waiting time in queue on server to get a thread to work the request on
     // + server processing time (API calls, DB ...)👑👑👑
-    // + serizalizing the response
+    // + serializing the response
     // + network transfer <->
     // until server closes the connection
-
 
     // to keep a bidirectional conn between client-server (eg chat)
     // we use WebSockets, Long polling (90s), Content-Type: text/event-stream

@@ -1,4 +1,4 @@
-package victor.training.resilience.client.imperative;//package victor.training.resilience.client.reactive;
+package victor.training.resilience.client.blocking;//package victor.training.resilience.client.reactive;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

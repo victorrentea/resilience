@@ -1,9 +1,7 @@
-package victor.training.resilience.client.imperative;//package victor.training.resilience.client.reactive;
+package victor.training.resilience.client.blocking;//package victor.training.resilience.client.reactive;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.circuitbreaker.event.CircuitBreakerEvent;
-import io.github.resilience4j.core.EventConsumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +16,7 @@ public class CircuitApi {
   private final CircuitBreakerRegistry circuitBreakerRegistry;
 
   @GetMapping("circuit")
+//  @io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker()
   public String circuit() {
     CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuit");
 //    circuitBreaker.getEventPublisher().onEvent(new EventConsumer<CircuitBreakerEvent>() {

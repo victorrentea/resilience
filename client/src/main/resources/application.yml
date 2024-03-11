@@ -29,11 +29,16 @@ resilience4j:
     instances:
       circuit:
         sliding-window-size: 5
-        sliding-window-type: count_based
+        sliding-window-type: time_based
+
+        failure-rate-threshold: .99 # 99%
+
+        slow-call-duration-threshold: 1s
+        slow-call-rate-threshold: 1 # 100%
 
         wait-duration-in-open-state: 2s
 
-        permitted-number-of-calls-in-half-open-state: 1
+        permitted-number-of-calls-in-half-open-state: 2
 spring:
   cache:
     caffeine:
