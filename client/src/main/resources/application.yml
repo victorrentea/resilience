@@ -8,12 +8,11 @@ resilience4j:
       rate:
         limit-for-period: 3 # no calls
         limit-refresh-period: 1m # .. per unit of time
-        timeout-duration: 0ms # how much to block calling thread until exception
+        timeout-duration: 1s # how much to block additional calling thread until exception
 
   bulkhead:
     configs:
       default: # default for any bulkhead
-
         max-concurrent-calls: 2
         max-wait-duration: 0ms # how much to allow calls to wait in line
 

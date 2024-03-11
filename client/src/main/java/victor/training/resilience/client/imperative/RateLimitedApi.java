@@ -2,10 +2,14 @@ package victor.training.resilience.client.imperative;//package victor.training.r
 
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.core.EventConsumer;
+import io.github.resilience4j.core.registry.RegistryEvent;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.ratelimiter.event.RateLimiterEvent;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.micrometer.observation.annotation.Observed;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,31 +26,26 @@ public class RateLimitedApi {
   private final RateLimiterRegistry rateLimiterRegistry;
 
   @GetMapping("rate")
-//  @RateLimiter(name="rate")
-//  @Async
-//  @Transactional
-//  @Secured
-//  @Cacheable
-//  @Observed
-//  @Logged
-//  @RateLimiter()
-//  @Bulkhead()
-
-
-//  @Retry()
-//  @CircuitBreaker()
+  @RateLimiter(name="rate") // #1 AOP alternative
   public String rate() {
-    return rateLimiterRegistry.rateLimiter("rate")
-        .executeSupplier(() -> protectedCall());
+    return protectedCall();
   }
 
-  public void method() {
-    rate();
+  public String rateFP() { // #2 FP alternative
+    return rateLimiterRegistry.rateLimiter("rate")
+        .executeSupplier(this::protectedCall);
   }
+
+  @PostConstruct
+  public void init() {
+    rateLimiterRegistry.rateLimiter("rate").getEventPublisher()
+        .onEvent(event -> log.info("RateLimiterEvent failed: " + event));
+  }
+
   @SneakyThrows
   private String protectedCall() {
-    // Imagine here: webClient...retrieve()
     log.info("CALL-START");
+    // Imagine here: webClient...retrieve(); restClient; restTemplate; SOAP client;
     Thread.sleep(1000);
     log.info("CALL-END");
     return "rate-limited-call";

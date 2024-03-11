@@ -14,45 +14,39 @@ import java.util.Random;
 @RestController
 @Slf4j
 public class ThrottledApi {
-  private final BulkheadRegistry bulkheadRegistry;
-
   @GetMapping("throttled") // throttling = limit the number of concurrent requests
-//  @Bulkhead(name = "bulkhead") // AOP proxies
+  @Bulkhead(name = "bulkhead") // #1 AOP alternative
   public String throttled() {
+    return protectedCall();
+  }
+
+  private final BulkheadRegistry bulkheadRegistry;
+  public String throttledFP() { // #2 FP alternative
     var globalBulkhead = bulkheadRegistry.bulkhead("bulkhead");
-    return globalBulkhead.executeSupplier(() -> { // FP solution
-      log.info("CALL-START");
-      var r=  protectedCall();
-      log.info("CALL-END");
-      return r;
-    });
+    return globalBulkhead.executeSupplier(this::protectedCall);
   }
 
   @GetMapping("throttled-tenant")
   public String throttledTenant() {
-    int user = new Random().nextInt(2);
+    int tenantId = new Random().nextInt(2);
     // Imagine tenant-id comes from:
-    // - @RequestHeader("x-tenant-id")
-    // - client-api-key
+    // - @RequestHeader("x-tenant-id") String tenantId
+    // - client-api-key from SecurityContextHolder.getContext().getAuthentication().getName();
     // - requestDto.region, ...
+    var bulkheadPerTenant = bulkheadRegistry.bulkhead("bulkhead-" + tenantId);
 
-    var perTenantBulkhead = bulkheadRegistry.bulkhead("bulkhead-" + user);
-
-    return perTenantBulkhead.executeSupplier(() -> {
-      log.info("CALL-START");
-      String r = protectedCall();
-      log.info("CALL-END");
-      return r;
-    });
+    return bulkheadPerTenant.executeSupplier(this::protectedCall);
   }
 
   @SneakyThrows
   private String protectedCall() {
+    log.info("CALL-START");
+    Thread.sleep(10000);
     // Imagine here:
     // - webClient...retrieve()
     // - repo.find/insert
     // - redis, kafka, mongo...
-    Thread.sleep(10000);
+    log.info("CALL-END");
     return "throttled-call";
   }
 }
