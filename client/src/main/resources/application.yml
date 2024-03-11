@@ -5,7 +5,7 @@ management.endpoint.health.show-details: always
 resilience4j:
   ratelimiter:
     instances:
-      rate:
+      rate1:
         limit-for-period: 3 # no calls
         limit-refresh-period: 1m # .. per unit of time
         timeout-duration: 1s # how much to block additional calling thread until exception
@@ -18,20 +18,20 @@ resilience4j:
 
   retry:
     instances:
-      retry:
+      retry1:
 #        retry-exception-predicate: victor.training.resilience.client.imperative.RetryPredicate
         max-attempts: 2
 
-#        retry-exceptions:
-#          - org.springframework.web.reactive.function.client.WebClientResponseException.InternalServerError
+        retry-exceptions:
+          - org.springframework.web.client.HttpServerErrorException.InternalServerError
 
   circuitbreaker:
     instances:
-      circuit:
+      circuit1:
         sliding-window-size: 5
         sliding-window-type: time_based
 
-        failure-rate-threshold: .99 # 99%
+        failure-rate-threshold: 99 # 99%
 
         slow-call-duration-threshold: 1s
         slow-call-rate-threshold: 1 # 100%
@@ -46,3 +46,5 @@ spring:
 logging:
   pattern:
     dateformat: "HH:mm:ss.SSS"
+
+target.url.base: http://localhost:8080

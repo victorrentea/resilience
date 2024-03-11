@@ -5,9 +5,9 @@ import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static java.time.Duration.ofSeconds;
 
-public class CircuitTest extends Simulation {
+public class CircuitLoadTest extends Simulation {
   public static void main(String[] args) {
-    GatlingEngine.startClass(CircuitTest.class);
+    GatlingEngine.startClass(CircuitLoadTest.class);
   }
 
   {

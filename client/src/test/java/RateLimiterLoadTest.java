@@ -5,16 +5,18 @@ import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static java.time.Duration.ofSeconds;
 
-public class ThrottledTenantTest extends Simulation {
+public class RateLimiterLoadTest extends Simulation {
   public static void main(String[] args) {
-    GatlingEngine.startClass(ThrottledTenantTest.class);
+    GatlingEngine.startClass(RateLimiterLoadTest.class);
   }
 
   {
+    String host = "http://localhost:8080";
+
     setUp(scenario(getClass().getSimpleName())
-        .exec(http("").get("/throttled-tenant"))
-        .injectClosed(constantConcurrentUsers(3).during(ofSeconds(5))))
-        .protocols(http.baseUrl("http://localhost:8080"))
+        .exec(http("").get("/rate"))
+        .injectClosed(constantConcurrentUsers(5).during(ofSeconds(5))))
+        .protocols(http.baseUrl(host))
         .assertions(global().successfulRequests().percent().gt(99.0));
   }
 }

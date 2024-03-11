@@ -19,8 +19,8 @@
 //public class ThrottledReactiveApi {
 //  private final BulkheadRegistry bulkheadRegistry;
 //
-//  @GetMapping("throttled") // throttling = limit the volume of concurrent requests
-//  public Mono<String> throttled() {
+//  @GetMapping("bulkhead") // throttling = limit the volume of concurrent requests
+//  public Mono<String> bulkhead() {
 //    Bulkhead globalBulkhead = bulkheadRegistry.bulkhead("bulkhead");
 //    return protectedCall()
 //        .doOnSubscribe(__ -> log.info("CALL-START"))
@@ -30,7 +30,7 @@
 //        ;
 //  }
 //
-//  @GetMapping("throttled-tenant")
+//  @GetMapping("bulkhead-tenant")
 //  public Mono<String> throttledTenant() {
 //    int tenantId = new Random().nextInt(2);
 //    // Imagine tenant-id comes from:
@@ -54,7 +54,7 @@
 //    // - webClient...retrieve()
 //    // - repo.find/insert
 //    // - redis, kafka, mongo...
-//    return Mono.just("throttled-call")
+//    return Mono.just("bulkhead-call")
 //        .delayElement(ofSeconds(1));
 //  }
 //}

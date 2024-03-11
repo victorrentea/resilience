@@ -1,4 +1,4 @@
-package victor.training.resilience.client;
+package victor.training.resilience;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
