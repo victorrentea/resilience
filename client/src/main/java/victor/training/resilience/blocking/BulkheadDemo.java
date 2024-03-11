@@ -20,7 +20,7 @@ import java.util.Random;
 public class BulkheadDemo {
 
   @GetMapping("bulkhead") // throttling = limit the number of concurrent requests
-  @Bulkhead(name = "bulkhead") // #1 AOP alternative
+  @Bulkhead(name = "bulkhead1") // #1 AOP alternative
   public String bulkhead() {
     return protectedCall();
   }
@@ -29,7 +29,7 @@ public class BulkheadDemo {
 
   @GetMapping("bulkhead-fp") // throttling = limit the number of concurrent requests
   public String bulkheadFP() { // #2 FP alternative
-    var globalBulkhead = bulkheadRegistry.bulkhead("bulkhead");
+    var globalBulkhead = bulkheadRegistry.bulkhead("bulkhead1");
     return globalBulkhead.executeSupplier(this::protectedCall);
   }
 
