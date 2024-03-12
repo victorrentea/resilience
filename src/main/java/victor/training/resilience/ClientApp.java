@@ -9,7 +9,6 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.Assert;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @SpringBootApplication
 @RestController
-@EnableFeignClients
 @RequiredArgsConstructor
 @EnableCaching
 public class ClientApp {
