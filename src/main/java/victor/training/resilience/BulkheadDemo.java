@@ -22,6 +22,9 @@ public class BulkheadDemo {
   @GetMapping("bulkhead") // throttling = limit the number of concurrent requests
   @Bulkhead(name = "bulkhead1") // #1 AOP alternative
   public String bulkhead() {
+    // FP over AOP
+//    bulkheadRegistry.bulkhead("name").executeSupplier(()->protectedCall())
+
     return protectedCall();
   }
 
