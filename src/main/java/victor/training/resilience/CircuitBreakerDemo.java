@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
@@ -38,5 +39,19 @@ public class CircuitBreakerDemo {
         .body(String.class);
     log.info("CALL-END");
     return r;
+  }
+
+  @GetMapping("circuit-api")
+  public String circuitApi(@RequestParam(required = false) TestState state) throws InterruptedException {
+    if (state!=null) this.state = state;
+    switch (state) {
+      case ERROR-> throw new RuntimeException("Failure");
+      case SLOW->Thread.sleep(5000);
+    }
+    return "Data";
+  }
+  TestState state=TestState.OK;
+  enum TestState {
+    OK, ERROR, SLOW
   }
 }

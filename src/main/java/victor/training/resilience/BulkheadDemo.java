@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Random;
 
@@ -37,12 +34,14 @@ public class BulkheadDemo {
   }
 
   @GetMapping("bulkhead-tenant")
-  public String throttledTenant() {
-    int tenantId = new Random().nextInt(2);
-    // tenant-id could come from:
+  public String throttledTenant(@RequestParam(required = false) String tenantId) {
+    // Tenant-id could be extracted from:
     // - @RequestHeader("x-tenant-id") String tenantId
     // - client-api-key from SecurityContextHolder.getContext().getAuthentication().getName();
     // - requestDto.region, ...
+    if (tenantId == null) {
+      tenantId = ""+new Random().nextInt(2);
+    }
     var bulkheadPerTenant = bulkheadRegistry.bulkhead("bulkhead-" + tenantId);
 
     return bulkheadPerTenant.executeSupplier(this::protectedCall);

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Resilience</title>
+</head>
+<body>
+<ul>
+    <li><a href="/bulkhead">Concurrent Calls</a> or <a href="/bulkhead-fp">with FP</a></li>
+
+    <li><a href="/bulkhead-tenant?tenantId=a">Concurrent Calls per ?tenantId</a></li>
+
+    <li>Idempotency: <a href="/orders">Get all orders</a>; Dup detected for:<br>
+        a) Header: POST /orders X-Idempotency-Key: abc<br>
+        b) Client-gen-ID: PUT /orders/abc
+    </li>
+
+    <li><a href="/rate">Rate Limiter</a> or <a href="/rate-fp">with FP</a> 3 calls / min</li>
+
+</ul>
+</body>
+</html>
