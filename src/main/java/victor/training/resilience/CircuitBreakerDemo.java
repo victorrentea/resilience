@@ -42,16 +42,9 @@ public class CircuitBreakerDemo {
   }
 
   @GetMapping("circuit-api")
-  public String circuitApi(@RequestParam(required = false) TestState state) throws InterruptedException {
-    if (state!=null) this.state = state;
-    switch (state) {
-      case ERROR-> throw new RuntimeException("Failure");
-      case SLOW->Thread.sleep(5000);
-    }
+  public String circuitApi() throws InterruptedException {
+//  throw new RuntimeException("Failure");
+//  Thread.sleep(5000);
     return "Data";
-  }
-  TestState state=TestState.OK;
-  enum TestState {
-    OK, ERROR, SLOW
   }
 }

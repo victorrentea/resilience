@@ -9,7 +9,11 @@ resilience4j:
         limit-for-period: 3 # number of calls
         limit-refresh-period: 1m # .. per unit of time
         timeout-duration: 1s # how much to block additional calling thread until exception
-
+    configs:
+      default: #default for any new rate limiter
+        limit-for-period: 2 # number of calls
+        limit-refresh-period: 1s # .. per unit of time
+        timeout-duration: 0s # how much to block additional calling thread until exception
   bulkhead:
     configs:
       default: # default for any bulkhead
@@ -20,7 +24,7 @@ resilience4j:
     instances:
       retry1:
         max-attempts: 3
-
+        wait-duration: 100ms
         retry-exceptions:
           - org.springframework.web.client.HttpServerErrorException.InternalServerError
          # or, custom predicate
@@ -31,10 +35,11 @@ resilience4j:
         sliding-window-size: 5
         sliding-window-type: time_based #seconds
 
-        slow-call-duration-threshold: 1s # resp time >
-        slow-call-rate-threshold: 1 # 100%
+        slow-call-duration-threshold: 2s # resp time >
+        slow-call-rate-threshold: 90 # 90%
 
         failure-rate-threshold: 99 # % failed => sare siguranta
+
 
         wait-duration-in-open-state: 2s # sarita 2 sec
 

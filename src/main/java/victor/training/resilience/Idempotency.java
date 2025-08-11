@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,7 +25,9 @@ public class Idempotency {
   public void createOrderIdempotencyHeader(
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
-    if (!recentIdempotencyKeys.add(idempotencyKey)) {
+//    new ArrayBlockingQueue<>()
+    boolean dupKey = recentIdempotencyKeys.add(idempotencyKey);
+    if (!dupKey) {
       throw new RuntimeException("Duplicated request with same idempotencyKey " + idempotencyKey);
     }
     orderRepo.save(new Order(UUID.randomUUID(), order));

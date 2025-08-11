@@ -34,7 +34,7 @@ public class RetryDemo {
   }
 
   @GetMapping("retry-fp")
-  public String retryFP() { // #2 FP
+  public String retryFP() { // #2 FP, less magic
     return retryRegistry.retry("retry1")
         .executeSupplier(this::performCall);
   }
@@ -68,7 +68,6 @@ public class RetryDemo {
     retryRegistry.retry("retry1").getEventPublisher().onEvent(event -> log.info("RetryEvent: " + event));
   }
   public static class RetryPredicate implements Predicate<Throwable> {
-
     @Override
     public boolean test(Throwable throwable) {
       System.out.println("Check error: " + throwable);

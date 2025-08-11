@@ -15,37 +15,23 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 
-import static java.util.Objects.requireNonNull;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class TimeoutDemo {
   private final RestClient restClient;
-  private final CacheManager cacheManager;
   @Value("${target.url.base}")
   private final String base;
 
   @GetMapping("timeout")
   public String timeout() {
-    Cache cache = Objects.requireNonNull(cacheManager.getCache("previous-response"));
-    try {
-      String r = restClient.get().uri(base + "/timeout-api") //below
-          .retrieve()
-          .body(String.class);
-      log.info("Got {}", r);
-      cache.put("previous", r);
-      return r;
-    } catch (Exception e) {
-      String r = cache.get("previous", String.class);
-      if (r == null) {
-        log.error("Failure could not be recovered from cache", e);
-        throw new RuntimeException("Unable to recover from cache: empty", e);
-      }
-      log.error("Recovered failure from cache", e);
-      return r + " (from cache)";
-    }
+    String r = restClient.get().uri(base + "/timeout-api") //below
+        .retrieve()
+        .body(String.class);
+    log.info("Got {}", r);
+    return r;
   }
+
 
   @GetMapping("timeout-api")
   public String timeoutApi() throws InterruptedException {
@@ -64,12 +50,11 @@ public class TimeoutDemo {
       RestTemplate restTemplate = new RestTemplate();
       var requestFactory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
       requestFactory.setConnectTimeout(20); // = TCP/IP handshake = time to wait for server to accept the connection
-      requestFactory.setReadTimeout(30000); // aka 'response timeout' =
-      // = waiting time in queue on server to get a thread to work the request on
-      // + server processing time, including any API calls, DB ...
+      requestFactory.setReadTimeout(2000); // aka 'response timeout' =
+      // = server processing time of my request, including any API calls, DB ...
+      // + network latency <->
       // + serializing the request/response
-      // + network transfer <->
-      // until remote server closes the connection
+      // + waiting time in queue on server to get a thread to work the request on
       return RestClient.create(restTemplate);
     }
   }

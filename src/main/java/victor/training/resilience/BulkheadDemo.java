@@ -50,7 +50,7 @@ public class BulkheadDemo {
   @SneakyThrows
   private String protectedCall() {
     log.info("CALL-START");
-    Thread.sleep(5000); // REST, DB, SOAP, gRPC ...
+    Thread.sleep(5000); // REST, DB, SOAP, gRPC ...¢
     log.info("CALL-END");
     return "bulkhead-call";
   }
