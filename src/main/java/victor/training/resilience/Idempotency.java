@@ -18,14 +18,13 @@ public class Idempotency {
   }
 
   // #1 Idempotency key window
-  //  TODO should not be local to one instance => Redis/DB?
-  //  TODO evict keys older than X seconds
+  //  TODO state should not be local to one instance => move to Redis/DB?
+  //  TODO evict keys older than X seconds on a timer?
   private final Set<String> recentIdempotencyKeys = Collections.synchronizedSet(new HashSet<>());
   @PostMapping("orders")
   public void createOrderIdempotencyHeader(
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
-//    new ArrayBlockingQueue<>()
     boolean dupKey = recentIdempotencyKeys.add(idempotencyKey);
     if (!dupKey) {
       throw new RuntimeException("Duplicated request with same idempotencyKey " + idempotencyKey);
