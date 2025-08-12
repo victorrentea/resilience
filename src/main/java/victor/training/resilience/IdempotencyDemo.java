@@ -1,15 +1,16 @@
 package victor.training.resilience;
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 
 @RequiredArgsConstructor
 @RestController
-public class Idempotency {
+public class IdempotencyDemo {
   private final OrderRepo orderRepo;
 
   @GetMapping("orders")
@@ -21,25 +22,35 @@ public class Idempotency {
   //  TODO state should not be local to one instance => move to Redis/DB?
   //  TODO evict keys older than X seconds on a timer?
   private final Set<String> recentIdempotencyKeys = Collections.synchronizedSet(new HashSet<>());
-  @PostMapping("orders")
-  public void createOrderIdempotencyHeader(
+  @PostMapping("orders/ik")
+  public void withIdempotencyHeader(
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
-    boolean dupKey = recentIdempotencyKeys.add(idempotencyKey);
-    if (!dupKey) {
+    boolean ikAlreadyReceived = recentIdempotencyKeys.add(idempotencyKey);
+    if (!ikAlreadyReceived) {
       throw new RuntimeException("Duplicated request with same idempotencyKey " + idempotencyKey);
     }
     orderRepo.save(new Order(UUID.randomUUID(), order));
   }
 
   // #2 Client-generated PK
-  @PutMapping("orders/{id}")
-  public void createOrderWithClientPK(@PathVariable String id, @RequestBody String order) {
-    orderRepo.save(new Order(UUID.randomUUID(), order));
+  @PutMapping("orders/{uuid}")
+  public void withClientPK(@PathVariable UUID uuid, @RequestBody String order) {
+    orderRepo.save(new Order(uuid, order));
   }
 
   // #3 "Common-Sense" window of recent requests (hashed)
-  private final Set<String> recentContentsHashes = Collections.synchronizedSet(new HashSet<>());
+  private final Set<HashCode> recentContentsHashes = Collections.synchronizedSet(new HashSet<>());
+
+  @PostMapping("orders")
+  public void withContentHashing(@RequestBody String order) {
+    HashCode contentHash = Hashing.sha512().hashBytes(order.getBytes());
+    boolean hashAlreadyReceived = recentContentsHashes.add(contentHash);
+    if (!hashAlreadyReceived) {
+      throw new RuntimeException("Duplicated request with same content");
+    }
+    orderRepo.save(new Order(UUID.randomUUID(), order));
+  }
 
   // --- support code
   public record Order(UUID id, String contents){}
