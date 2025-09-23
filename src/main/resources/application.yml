@@ -5,14 +5,12 @@ management.endpoint.health.show-details: always
 resilience4j:
   ratelimiter: # props of: io.github.resilience4j.common.ratelimiter.configuration.CommonRateLimiterConfigurationProperties.InstanceProperties
     instances:
-      rate1:
-        # TODO customize for 'rate1' ratelimiter
-        limit-for-period: 3 # number of calls
-        limit-refresh-period: 1m # .. per unit of time
-        timeout-duration: 1s # how much to block additional calling thread until exception
-    configs:
+      rate1ABC: # 3 / s
+        limit-for-period: 2
+        limit-refresh-period: 1s
+    configs: # 2 / s
       default: #default for any new rate limiter (used by tenant-based rate limiting)
-        limit-for-period: 2 # number of calls
+        limit-for-period: 3 # number of calls
         limit-refresh-period: 1s # .. per unit of time
         timeout-duration: 0s # how much to block additional calling thread until exception
 

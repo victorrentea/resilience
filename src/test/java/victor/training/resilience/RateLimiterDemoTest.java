@@ -1,6 +1,7 @@
 package victor.training.resilience;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,28 +26,23 @@ public class RateLimiterDemoTest {
   @Autowired
   RateLimiterDemo rateLimiterDemo;
 
-  @Test
+  @Test // TODO default rate limiter of 3 req/min
   void rate() throws ExecutionException, InterruptedException {
     assertThat(rateLimiterDemo.rateLimiter("")).isEqualTo("OK");
     assertThat(rateLimiterDemo.rateLimiter("")).isEqualTo("OK");
     assertThat(rateLimiterDemo.rateLimiter("")).isEqualTo("OK");
     assertThatThrownBy(()->rateLimiterDemo.rateLimiter(""));
-  }
-
-  @Test
-  void ratePerTenant() throws ExecutionException, InterruptedException {
-    assertThat(rateLimiterDemo.rateLimiter("tenant2")).isEqualTo("OK");
-    assertThat(rateLimiterDemo.rateLimiter("tenant2")).isEqualTo("OK");
-    assertThatThrownBy(()->rateLimiterDemo.rateLimiter("tenant2"));
-  }
-
-  @Test
-  void ratePerTenant_worksLater() throws ExecutionException, InterruptedException {
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
-    assertThatThrownBy(()->rateLimiterDemo.rateLimiter("tenant1"));
     Thread.sleep(1100);
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("")).isEqualTo("OK");
+  }
+
+  @Test // TODO for tenant ABC, rate limit to 2 req/min
+  void ratePerTenant_worksLater() throws ExecutionException, InterruptedException {
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
+    assertThatThrownBy(()->rateLimiterDemo.rateLimiter("ABC"));
+    Thread.sleep(1100);
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
   }
 }
