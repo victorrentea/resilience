@@ -58,7 +58,7 @@ public class RetryDemoTest {
         .isInstanceOf(HttpServerErrorException.InternalServerError.class)
         .hasMessageContaining(ERROR_PAYLOAD);
 
-    List<LoggedRequest> calls = findAll(anyRequestedFor(anyUrl()));
+    List<LoggedRequest> calls = WireMock.findAll(anyRequestedFor(anyUrl()));
     assertThat(calls).hasSize(3);
     assertThat(calls.get(0).getLoggedDate()).isCloseTo(t0, 10);
     assertThat(calls.get(1).getLoggedDate()).isCloseTo(new Date(t0.getTime()+110), 50);

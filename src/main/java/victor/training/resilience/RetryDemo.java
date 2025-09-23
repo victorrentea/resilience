@@ -31,12 +31,11 @@ public class RetryDemo {
   public String retryAOP() {
     return performCall();
   }
-
   private final RetryRegistry retryRegistry;
   @GetMapping("retry-fp")
   public String retryFP() { // #2 FP, less magic
-//    retryRegistry... TODO
-    return performCall();
+    return retryRegistry.retry("retryABC")
+        .executeSupplier(()->performCall());
   }
 
   private final AtomicInteger counter = new AtomicInteger(1);

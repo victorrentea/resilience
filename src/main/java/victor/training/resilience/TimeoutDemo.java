@@ -40,8 +40,19 @@ public class TimeoutDemo {
       RestTemplate restTemplate = new RestTemplate();
       var requestFactory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
       // TODO set the response timeout to 2000 millis
+      requestFactory.setConnectTimeout(20);
+      requestFactory.setReadTimeout(2000);
       return RestClient.create(restTemplate);
     }
+//    @Bean
+//    public RestClient restClientADHD() { // z-gen
+//      RestTemplate restTemplate = new RestTemplate();
+//      var requestFactory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
+//      requestFactory.setConnectTimeout(20);
+//      requestFactory.setReadTimeout(500);
+//      return RestClient.create(restTemplate);
+//
+//    }
   }
 
 

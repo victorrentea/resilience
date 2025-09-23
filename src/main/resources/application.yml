@@ -18,10 +18,12 @@ resilience4j:
 #      default: # default for any bulkhead
         # TODO
 
-#  retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
-#    instances:
-#      retry1:
-        # TODO
+  retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
+    instances:
+      retryABC:
+        max-attempts: 2
+        wait-duration: 100ms
+
 
   circuitbreaker: # props of: io.github.resilience4j.common.circuitbreaker.configuration.CommonCircuitBreakerConfigurationProperties.InstanceProperties
     instances:
