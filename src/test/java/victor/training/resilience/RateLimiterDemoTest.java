@@ -1,6 +1,7 @@
 package victor.training.resilience;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class RateLimiterDemoTest {
   @Autowired
   RateLimiterDemo rateLimiterDemo;
 
-  @Test
+  @Test // TODO configure rate limiter of 3 req/min
   void rate() throws ExecutionException, InterruptedException {
     assertThat(rateLimiterDemo.rateLimiter("")).isEqualTo("OK");
     assertThat(rateLimiterDemo.rateLimiter("")).isEqualTo("OK");
@@ -33,20 +34,13 @@ public class RateLimiterDemoTest {
     assertThatThrownBy(()->rateLimiterDemo.rateLimiter(""));
   }
 
-  @Test
-  void ratePerTenant() throws ExecutionException, InterruptedException {
-    assertThat(rateLimiterDemo.rateLimiter("tenant2")).isEqualTo("OK");
-    assertThat(rateLimiterDemo.rateLimiter("tenant2")).isEqualTo("OK");
-    assertThatThrownBy(()->rateLimiterDemo.rateLimiter("tenant2"));
-  }
-
-  @Test
+  @Test // for tenant1: ratelimiter to 2 / sec
   void ratePerTenant_worksLater() throws ExecutionException, InterruptedException {
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
-    assertThatThrownBy(()->rateLimiterDemo.rateLimiter("tenant1"));
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
+    assertThatThrownBy(()->rateLimiterDemo.rateLimiter("ABC"));
     Thread.sleep(1100);
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
-    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("ABC")).isEqualTo("OK");
   }
 }

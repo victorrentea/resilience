@@ -17,7 +17,7 @@ public class BulkheadDemoTest {
   @Autowired
   BulkheadDemo bulkheadDemo;
 
-  @Test
+  @Test // clients can call this method at most twice in parallel
   void explore() throws ExecutionException, InterruptedException {
     var f1 = supplyAsync(() -> bulkheadDemo.bulkheadFP());
     Thread.sleep(10);

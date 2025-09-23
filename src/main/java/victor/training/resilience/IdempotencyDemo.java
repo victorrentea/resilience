@@ -19,24 +19,28 @@ public class IdempotencyDemo {
   public void byIdempotencyHeader(
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
-    // TODO
+    if (recentIdempotencyKeys.contains(idempotencyKey)) return; // duplicate!
     orderRepo.save(new Order(UUID.randomUUID(), order));
+    recentIdempotencyKeys.add(idempotencyKey);
   }
+
   // TODO risk of storing this in-memory? ....
   // TODO [optional] evict entries older than X seconds after 3 seconds
 
   // ==== Option 2: Client-generated PK ====
   @PutMapping("orders/{uuid}")
   public void byClientPK(@PathVariable UUID uuid, @RequestBody String order) {
-    // TODO
+    orderRepo.save(new Order(uuid,order)); // PK violation on dups
   }
 
   // ==== Option 3: window of recent requests payloads (hashed) ====
   private final Set<HashCode> recentContentsHashes = Collections.synchronizedSet(new HashSet<>());
-
   @PostMapping("orders")
   public void byContentHashing(@RequestBody String order) {
-    // TODO
+    HashCode orderHash = Hashing.sha256().hashUnencodedChars(order);
+    if (recentContentsHashes.contains(orderHash)) {
+      return; // duplicate!
+    }
     orderRepo.save(new Order(UUID.randomUUID(), order));
   }
 

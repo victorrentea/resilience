@@ -50,6 +50,8 @@ public class RetryDemoTest {
   @Test // when the error does not go away, 3 attempts are made with a fixed backoff of 100ms
   void persistentFailure() throws ExecutionException, InterruptedException {
     wireMockResponseSeq(get(urlEqualTo("/retry-api")),
+        aResponse().withStatus(500).withBody(ERROR_PAYLOAD),
+        aResponse().withStatus(500).withBody(ERROR_PAYLOAD),
         aResponse().withStatus(500).withBody(ERROR_PAYLOAD)
     );
 
