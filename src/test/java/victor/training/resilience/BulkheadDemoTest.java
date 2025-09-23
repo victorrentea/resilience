@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.concurrent.ExecutionException;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class BulkheadDemoTest {
@@ -21,9 +22,29 @@ public class BulkheadDemoTest {
     var f2 = supplyAsync(() -> bulkheadDemo.bulkheadFP());
     Thread.sleep(10);
     var f3 = supplyAsync(() -> bulkheadDemo.bulkheadFP());
+
     System.out.println("Patience: This tests should take several seconds to complete ...");
-    f1.get();
-    f2.get();
-    Assertions.assertThatThrownBy(f3::get).hasMessageContaining("Bulkhead");
+    f1.get(); // 1st call ✅
+    f2.get(); // 2nd call ✅
+    assertThatThrownBy(f3::get) // 3rd ❌
+        .describedAs("Third parallel call should've been rejected")
+        .hasMessageContaining("Bulkhead");
+  }
+
+  @Test
+  void perTenant() throws ExecutionException, InterruptedException {
+    var fa1 = supplyAsync(() -> bulkheadDemo.bulkheadPerTenant("a"));
+    Thread.sleep(10);
+    var fa2 = supplyAsync(() -> bulkheadDemo.bulkheadPerTenant("a"));
+    Thread.sleep(10);
+    var fa3 = supplyAsync(() -> bulkheadDemo.bulkheadPerTenant("a"));
+    Thread.sleep(10);
+    var fb = supplyAsync(() -> bulkheadDemo.bulkheadPerTenant("b"));
+
+    System.out.println("Patience: This tests should take several seconds to complete ...");
+    fa1.get();
+    fa2.get();
+    assertThatThrownBy(fa3::get).hasMessageContaining("Bulkhead");
+    fb.get();
   }
 }

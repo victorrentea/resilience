@@ -19,9 +19,9 @@ public class IdempotencyDemoTest {
   @Test
   void byIdempotencyKey() {
     String ik = UUID.randomUUID().toString();
-    idempotencyDemo.withIdempotencyHeader(ik, "ik");
+    idempotencyDemo.byIdempotencyHeader(ik, "ik");
     try {
-      idempotencyDemo.withIdempotencyHeader(ik, "ik"); // retry
+      idempotencyDemo.byIdempotencyHeader(ik, "ik"); // retry
     } catch (Exception ignored) {
     }
 
@@ -31,11 +31,11 @@ public class IdempotencyDemoTest {
   }
 
   @Test
-  void withClientPK() {
+  void byClientPK() {
     UUID orderId = UUID.randomUUID();
-    idempotencyDemo.withClientPK(orderId, "client-id");
+    idempotencyDemo.byClientPK(orderId, "client-id");
     try {
-      idempotencyDemo.withClientPK(orderId, "client-id"); // retry
+      idempotencyDemo.byClientPK(orderId, "client-id"); // retry
     } catch (Exception ignored) {
     }
 
@@ -45,10 +45,10 @@ public class IdempotencyDemoTest {
   }
 
   @Test
-  void withContentHashing() {
-    idempotencyDemo.withContentHashing("content-hash");
+  void byContentHashing() {
+    idempotencyDemo.byContentHashing("content-hash");
     try {
-      idempotencyDemo.withContentHashing("content-hash"); // retry
+      idempotencyDemo.byContentHashing("content-hash"); // retry
     } catch (Exception ignored) {
     }
 

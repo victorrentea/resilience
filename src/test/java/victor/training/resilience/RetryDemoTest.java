@@ -27,7 +27,7 @@ public class RetryDemoTest {
   @Autowired
   RetryDemo retryDemo;
 
-  @Test
+  @Test // when the error does not go away, 3 attempts are made with a fixed backoff of 100ms
   void persistentFailure() throws ExecutionException, InterruptedException {
     WireMock.stubFor(get(urlEqualTo("/retry-api"))
         .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
@@ -45,7 +45,7 @@ public class RetryDemoTest {
     assertThat(calls.get(2).getLoggedDate()).isCloseTo(new Date(t0.getTime()+210), 50);
   }
 
-  @Test
+  @Test // the second attempt succeeds
   void oneFailure() throws ExecutionException, InterruptedException {
     WireMock.stubFor(get(urlEqualTo("/retry-api"))
         .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
@@ -55,7 +55,7 @@ public class RetryDemoTest {
     assertThat(retryDemo.retryFP()).isEqualTo(OK_PAYLOAD);
   }
 
-  @Test
+  @Test // the third attempt succeeds
   void twoFailures() throws ExecutionException, InterruptedException {
     WireMock.stubFor(get(urlEqualTo("/retry-api"))
         .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
@@ -66,7 +66,7 @@ public class RetryDemoTest {
     assertThat(retryDemo.retryFP()).isEqualTo(OK_PAYLOAD);
   }
 
-  @Test
+  @Test // a 400 Bad Request response is not retried
   void badRequestIsNotRetried() throws ExecutionException, InterruptedException {
     WireMock.stubFor(get(urlEqualTo("/retry-api"))
         .willReturn(aResponse().withBody(ERROR_PAYLOAD).withStatus(400)));

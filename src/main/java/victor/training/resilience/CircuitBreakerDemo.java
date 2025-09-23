@@ -41,6 +41,8 @@ public class CircuitBreakerDemo {
     return r;
   }
 
+  // ============ for further experiments w/o @Test =============
+
   @GetMapping("circuit-api")
   public String circuitApi() throws InterruptedException {
 //  throw new RuntimeException("Failure");

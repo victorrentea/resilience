@@ -49,6 +49,20 @@ public class RetryDemo {
     return r;
   }
 
+  @PostConstruct
+  public void init() {
+    retryRegistry.retry("retry1").getEventPublisher().onEvent(event -> log.info("RetryEvent: " + event));
+  }
+  public static class RetryPredicate implements Predicate<Throwable> {
+    @Override
+    public boolean test(Throwable throwable) {
+      System.out.println("Check error: " + throwable);
+      return false;
+    }
+  }
+
+  // ============ for further experiments w/o @Test =============
+
   @GetMapping("retry-api")
   public ResponseEntity<String> retryApi() {
     if (Math.random() < .5) {
@@ -61,18 +75,5 @@ public class RetryDemo {
 //      return ResponseEntity.status(503).body("Service Unavailable - retry");
 //      return ResponseEntity.status(500).contentType(MediaType.APPLICATION_JSON).body("{\"retryable\": true}");
     }
-  }
-
-  @PostConstruct
-  public void init() {
-    retryRegistry.retry("retry1").getEventPublisher().onEvent(event -> log.info("RetryEvent: " + event));
-  }
-  public static class RetryPredicate implements Predicate<Throwable> {
-    @Override
-    public boolean test(Throwable throwable) {
-      System.out.println("Check error: " + throwable);
-      return false;
-    }
-
   }
 }

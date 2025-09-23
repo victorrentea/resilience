@@ -13,17 +13,10 @@ import java.util.*;
 public class IdempotencyDemo {
   private final OrderRepo orderRepo;
 
-  @GetMapping("orders")
-  public Map<UUID, Order> getOrders() {
-    return orderRepo.findAll();
-  }
-
-  // #1 Idempotency key window
-  //  TODO state should not be local to one instance => move to Redis/DB?
-  //  TODO evict keys older than X seconds on a timer?
+  // ==== Option 1: Idempotency key window ====
   private final Set<String> recentIdempotencyKeys = Collections.synchronizedSet(new HashSet<>());
   @PostMapping("orders/ik")
-  public void withIdempotencyHeader(
+  public void byIdempotencyHeader(
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
     boolean ikAlreadyReceived = recentIdempotencyKeys.add(idempotencyKey);
@@ -32,18 +25,20 @@ public class IdempotencyDemo {
     }
     orderRepo.save(new Order(UUID.randomUUID(), order));
   }
+  // TODO risk of storing this in-memory? ....
+  // TODO [optional] evict entries older than X seconds after 3 seconds
 
-  // #2 Client-generated PK
+  // ==== Option 2: Client-generated PK ====
   @PutMapping("orders/{uuid}")
-  public void withClientPK(@PathVariable UUID uuid, @RequestBody String order) {
+  public void byClientPK(@PathVariable UUID uuid, @RequestBody String order) {
     orderRepo.save(new Order(uuid, order));
   }
 
-  // #3 "Common-Sense" window of recent requests (hashed)
+  // ==== Option 3: window of recent requests payloads (hashed) ====
   private final Set<HashCode> recentContentsHashes = Collections.synchronizedSet(new HashSet<>());
 
   @PostMapping("orders")
-  public void withContentHashing(@RequestBody String order) {
+  public void byContentHashing(@RequestBody String order) {
     HashCode contentHash = Hashing.sha512().hashBytes(order.getBytes());
     boolean hashAlreadyReceived = recentContentsHashes.add(contentHash);
     if (!hashAlreadyReceived) {
@@ -52,8 +47,14 @@ public class IdempotencyDemo {
     orderRepo.save(new Order(UUID.randomUUID(), order));
   }
 
-  // --- support code
-  public record Order(UUID id, String contents){}
+  // =============== support code =================
+
+  @GetMapping("orders")
+  public Map<UUID, Order> getOrders() {
+    return orderRepo.findAll();
+  }
+
+  public record Order(UUID id, String contents) {}
 
   @Repository
   static class OrderRepo{
@@ -70,3 +71,4 @@ public class IdempotencyDemo {
     }
   }
 }
+

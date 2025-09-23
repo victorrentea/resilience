@@ -3,7 +3,7 @@ management.endpoints.web.exposure.include: "*"
 management.endpoint.health.show-details: always
 
 resilience4j:
-  ratelimiter:
+  ratelimiter: # props of: io.github.resilience4j.common.ratelimiter.configuration.CommonRateLimiterConfigurationProperties.InstanceProperties
     instances:
       rate1:
         limit-for-period: 3 # number of calls
@@ -14,13 +14,14 @@ resilience4j:
         limit-for-period: 2 # number of calls
         limit-refresh-period: 1s # .. per unit of time
         timeout-duration: 0s # how much to block additional calling thread until exception
-  bulkhead:
+
+  bulkhead: # props of: io.github.resilience4j.common.bulkhead.configuration.CommonBulkheadConfigurationProperties.InstanceProperties
     configs:
       default: # default for any bulkhead
         max-concurrent-calls: 2
         max-wait-duration: 0ms # how much to allow calls to wait in line
 
-  retry:
+  retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
     instances:
       retry1:
         max-attempts: 3
@@ -29,7 +30,8 @@ resilience4j:
           - org.springframework.web.client.HttpServerErrorException.InternalServerError
          # or, custom predicate
 #        retry-exception-predicate: victor.training.resilience.RetryDemo.RetryPredicate
-  circuitbreaker:
+
+  circuitbreaker: # props of: io.github.resilience4j.common.circuitbreaker.configuration.CommonCircuitBreakerConfigurationProperties.InstanceProperties
     instances:
       circuit1:
         sliding-window-size: 5
@@ -44,10 +46,12 @@ resilience4j:
         wait-duration-in-open-state: 2s # sarita 2 sec
 
         permitted-number-of-calls-in-half-open-state: 2 # 2 calls can try out the remote
+
 spring:
   cache:
     caffeine:
       spec: maximumSize=100,expireAfterWrite=2s
+
 logging:
   pattern:
     dateformat: "HH:mm:ss.SSS"

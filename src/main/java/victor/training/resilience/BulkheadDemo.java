@@ -19,9 +19,6 @@ public class BulkheadDemo {
   @GetMapping("bulkhead") // throttling = limit the number of concurrent requests
   @Bulkhead(name = "bulkhead1") // #1 AOP alternative
   public String bulkhead() {
-    // FP over AOP
-//    bulkheadRegistry.bulkhead("name").executeSupplier(()->protectedCall())
-
     return protectedCall();
   }
 
@@ -29,12 +26,12 @@ public class BulkheadDemo {
 
   @GetMapping("bulkhead-fp") // throttling = limit the number of concurrent requests
   public String bulkheadFP() { // #2 FP alternative
-    var globalBulkhead = bulkheadRegistry.bulkhead("bulkhead1");
-    return globalBulkhead.executeSupplier(this::protectedCall);
+    return (bulkheadRegistry.bulkhead("bulkhead1"))
+        .executeSupplier(this::protectedCall);
   }
 
   @GetMapping("bulkhead-tenant")
-  public String throttledTenant(@RequestParam(required = false) String tenantId) {
+  public String bulkheadPerTenant(@RequestParam(required = false) String tenantId) {
     // Tenant-id could be extracted from:
     // - @RequestHeader("x-tenant-id") String tenantId
     // - client-api-key from SecurityContextHolder.getContext().getAuthentication().getName();
@@ -42,15 +39,15 @@ public class BulkheadDemo {
     if (tenantId == null) {
       tenantId = ""+new Random().nextInt(2);
     }
-    var bulkheadPerTenant = bulkheadRegistry.bulkhead("bulkhead-" + tenantId);
 
-    return bulkheadPerTenant.executeSupplier(this::protectedCall);
+    return bulkheadRegistry.bulkhead("bulkhead-" + tenantId)
+        .executeSupplier(this::protectedCall);
   }
 
   @SneakyThrows
   private String protectedCall() {
     log.info("CALL-START");
-    Thread.sleep(5000); // REST, DB, SOAP, gRPC ...¢
+    Thread.sleep(5000); // imagine REST, DB, SOAP, gRPC ...¢
     log.info("CALL-END");
     return "bulkhead-call";
   }
