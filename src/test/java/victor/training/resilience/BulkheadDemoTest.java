@@ -1,5 +1,6 @@
 package victor.training.resilience;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Slf4j
 @SpringBootTest
 public class BulkheadDemoTest {
   @Autowired
@@ -24,11 +26,12 @@ public class BulkheadDemoTest {
     var f3 = supplyAsync(() -> bulkheadDemo.bulkheadFP());
 
     System.out.println("Patience: This tests should take several seconds to complete ...");
-    f1.get(); // 1st call ✅
-    f2.get(); // 2nd call ✅
     assertThatThrownBy(f3::get) // 3rd ❌
         .describedAs("Third parallel call should've been rejected")
         .hasMessageContaining("Bulkhead");
+    log.info("Third failed immediately");
+    f1.get(); // 1st call ✅
+    f2.get(); // 2nd call ✅
   }
 
   @Test
