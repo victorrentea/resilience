@@ -4,7 +4,6 @@ import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,9 +26,14 @@ public class RateLimiterDemo {
   }
 
   @GetMapping("rate-fp")
-  public String rateLimiter(
-      @RequestHeader(defaultValue = "tenant1", required = false) String tenantId) {
-    return rateLimiterRegistry.rateLimiter("rate1"+tenantId)
+  public String global() {
+    return rateLimiterRegistry.rateLimiter("rate1")
+        .executeSupplier(rateLimitedLogic::logic);
+  }
+
+  @GetMapping("rate-per-tenant")
+  public String perTenant(@RequestHeader String tenantId) {
+    return rateLimiterRegistry.rateLimiter("rate-"+tenantId)
         .executeSupplier(rateLimitedLogic::logic);
   }
   @PostConstruct

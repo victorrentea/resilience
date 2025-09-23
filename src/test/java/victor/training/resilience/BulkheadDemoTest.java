@@ -25,7 +25,7 @@ public class BulkheadDemoTest {
     Thread.sleep(10);
     var f3 = supplyAsync(() -> bulkheadDemo.bulkheadFP());
 
-    // Task 1 and 2 running, Task 3 rejected ❌
+    // Task 1 + 2 = running ✅, Task 3 = rejected ❌
     System.out.println("Patience: This tests should take several seconds to complete ...");
     assertThatThrownBy(f3::get) // 3rd ❌
         .describedAs("Third parallel call should've been rejected")

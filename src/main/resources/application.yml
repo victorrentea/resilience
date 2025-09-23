@@ -5,7 +5,7 @@ management.endpoint.health.show-details: always
 resilience4j:
   ratelimiter: # props of: io.github.resilience4j.common.ratelimiter.configuration.CommonRateLimiterConfigurationProperties.InstanceProperties
     instances:
-      rate1ABC: # 3 / s
+      rate-ABC: # 3 / s
         limit-for-period: 2
         limit-refresh-period: 1s
     configs: # 2 / s

@@ -73,6 +73,7 @@ public class RetryDemoTest {
   }
 
   @Test // a 400 Bad Request response is not retried
+  // thrown by RestClient as HttpClientErrorException.BadRequest
   void badRequestIsNotRetried() throws ExecutionException, InterruptedException {
     wireMockSequence(get(urlEqualTo("/retry-api")),
         aResponse().withBody(ERROR_PAYLOAD).withStatus(400));

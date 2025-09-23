@@ -11,8 +11,8 @@
     <li><a href="/bulkhead-tenant?tenantId=a">Concurrent Calls per ?tenantId</a></li>
 
     <li>Idempotency: <a href="/orders">Get all orders</a>; Dup detected for:<br>
-        a) Header: POST /orders X-Idempotency-Key: abc<br>
-        b) Client-gen-ID: PUT /orders/abc
+        a) Header: POST /orders with header X-Idempotency-Key: abc<br>
+        b) Client-generated-ID: PUT /orders/abc
     </li>
 
     <li><a href="/rate">Rate Limiter</a> or <a href="/rate-fp">with FP</a> 3 calls / min</li>
