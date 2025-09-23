@@ -40,13 +40,6 @@ public class TimeoutDemo {
       RestTemplate restTemplate = new RestTemplate();
       var requestFactory = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
       // TODO set the response timeout to 2000 millis
-      requestFactory.setConnectTimeout(20); // = TCP/IP handshake = time to wait for server to accept the connection
-      requestFactory.setReadTimeout(2000);
-      // aka 'response timeout' =
-      // = server processing time of my request, including any API calls, DB ...
-      // + network latency <->
-      // + serializing the request/response
-      // + waiting time in queue on server to get a thread to work the request on
       return RestClient.create(restTemplate);
     }
   }

@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public class RetryDemo {
   private final RestClient rest;
-  private final RetryRegistry retryRegistry;
   @Value("${target.url.base}")
   private final String base;
 
@@ -33,10 +32,11 @@ public class RetryDemo {
     return performCall();
   }
 
+  private final RetryRegistry retryRegistry;
   @GetMapping("retry-fp")
   public String retryFP() { // #2 FP, less magic
-    return retryRegistry.retry("retry1")
-        .executeSupplier(this::performCall);
+//    retryRegistry... TODO
+    return performCall();
   }
 
   private final AtomicInteger counter = new AtomicInteger(1);

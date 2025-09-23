@@ -1,5 +1,7 @@
 package victor.training.resilience;
 
+import com.github.tomakehurst.wiremock.client.MappingBuilder;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import org.junit.jupiter.api.Test;
@@ -12,9 +14,11 @@ import org.wiremock.spring.EnableWireMock;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
@@ -27,10 +31,26 @@ public class RetryDemoTest {
   @Autowired
   RetryDemo retryDemo;
 
+  public static void wireMockResponseSeq(MappingBuilder request, ResponseDefinitionBuilder... steps) {
+    String scenarioName = UUID.randomUUID().toString();
+    stubFor(request
+        .inScenario(scenarioName)
+        .whenScenarioStateIs(STARTED)
+        .willReturn(steps[0])
+        .willSetStateTo("STEP1"));
+    for (int i = 1; i < steps.length; i++) {
+    stubFor(request.withId(UUID.randomUUID())
+        .inScenario(scenarioName)
+        .whenScenarioStateIs("STEP"+i)
+        .willReturn(steps[i])
+        .willSetStateTo("STEP"+i));
+
+    }
+  }
   @Test // when the error does not go away, 3 attempts are made with a fixed backoff of 100ms
   void persistentFailure() throws ExecutionException, InterruptedException {
-    WireMock.stubFor(get(urlEqualTo("/retry-api"))
-        .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
+    wireMockResponseSeq(get(urlEqualTo("/retry-api")),
+        aResponse().withStatus(500).withBody(ERROR_PAYLOAD)
     );
 
     Date t0 = new Date();
@@ -47,9 +67,9 @@ public class RetryDemoTest {
 
   @Test // the second attempt succeeds
   void oneFailure() throws ExecutionException, InterruptedException {
-    WireMock.stubFor(get(urlEqualTo("/retry-api"))
-        .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
-        .willReturn(aResponse().withStatus(200).withBody(OK_PAYLOAD))
+    wireMockResponseSeq(get(urlEqualTo("/retry-api")),
+        aResponse().withStatus(500).withBody(ERROR_PAYLOAD),
+        aResponse().withStatus(200).withBody(OK_PAYLOAD)
     );
 
     assertThat(retryDemo.retryFP()).isEqualTo(OK_PAYLOAD);
@@ -57,10 +77,10 @@ public class RetryDemoTest {
 
   @Test // the third attempt succeeds
   void twoFailures() throws ExecutionException, InterruptedException {
-    WireMock.stubFor(get(urlEqualTo("/retry-api"))
-        .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
-        .willReturn(aResponse().withStatus(500).withBody(ERROR_PAYLOAD))
-        .willReturn(aResponse().withStatus(200).withBody(OK_PAYLOAD))
+    wireMockResponseSeq(get(urlEqualTo("/retry-api")),
+        aResponse().withStatus(500).withBody(ERROR_PAYLOAD),
+        aResponse().withStatus(500).withBody(ERROR_PAYLOAD),
+        aResponse().withStatus(200).withBody(OK_PAYLOAD)
     );
 
     assertThat(retryDemo.retryFP()).isEqualTo(OK_PAYLOAD);
@@ -68,8 +88,8 @@ public class RetryDemoTest {
 
   @Test // a 400 Bad Request response is not retried
   void badRequestIsNotRetried() throws ExecutionException, InterruptedException {
-    WireMock.stubFor(get(urlEqualTo("/retry-api"))
-        .willReturn(aResponse().withBody(ERROR_PAYLOAD).withStatus(400)));
+    wireMockResponseSeq(get(urlEqualTo("/retry-api")),
+        aResponse().withBody(ERROR_PAYLOAD).withStatus(400));
 
     assertThatThrownBy(() -> retryDemo.retryFP())
         .isInstanceOf(HttpClientErrorException.BadRequest.class)

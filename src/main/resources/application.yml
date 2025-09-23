@@ -4,35 +4,24 @@ management.endpoint.health.show-details: always
 
 resilience4j:
   ratelimiter: # props of: io.github.resilience4j.common.ratelimiter.configuration.CommonRateLimiterConfigurationProperties.InstanceProperties
-    instances:
-      rate1:
+#    instances:
+#      rate1:
         # TODO customize for 'rate1' ratelimiter
-        limit-for-period: 3 # number of calls
-        limit-refresh-period: 1m # .. per unit of time
-        timeout-duration: 1s # how much to block additional calling thread until exception
     configs:
       default: #default for any new rate limiter (used by tenant-based rate limiting)
         limit-for-period: 2 # number of calls
         limit-refresh-period: 1s # .. per unit of time
         timeout-duration: 0s # how much to block additional calling thread until exception
 
-  bulkhead: # props of: io.github.resilience4j.common.bulkhead.configuration.CommonBulkheadConfigurationProperties.InstanceProperties
-    configs:
-      default: # default for any bulkhead
+#  bulkhead: # props of: io.github.resilience4j.common.bulkhead.configuration.CommonBulkheadConfigurationProperties.InstanceProperties
+#    configs:
+#      default: # default for any bulkhead
         # TODO
-        max-concurrent-calls: 2
-        max-wait-duration: 0ms # how much to allow calls to wait in line
 
-  retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
-    instances:
-      retry1:
+#  retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
+#    instances:
+#      retry1:
         # TODO
-        max-attempts: 3
-        wait-duration: 100ms
-        retry-exceptions:
-          - org.springframework.web.client.HttpServerErrorException.InternalServerError
-         # or, custom predicate
-#        retry-exception-predicate: victor.training.resilience.RetryDemo.RetryPredicate
 
   circuitbreaker: # props of: io.github.resilience4j.common.circuitbreaker.configuration.CommonCircuitBreakerConfigurationProperties.InstanceProperties
     instances:
@@ -45,7 +34,6 @@ resilience4j:
         slow-call-rate-threshold: 90 # 90%
 
         failure-rate-threshold: 99 # % failed => sare siguranta
-
 
         wait-duration-in-open-state: 2s # sarita 2 sec
 

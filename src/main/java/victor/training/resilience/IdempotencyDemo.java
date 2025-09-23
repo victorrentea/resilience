@@ -20,10 +20,6 @@ public class IdempotencyDemo {
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
     // TODO
-    boolean ikAlreadyReceived = recentIdempotencyKeys.add(idempotencyKey);
-    if (!ikAlreadyReceived) {
-      throw new RuntimeException("Duplicated request with same idempotencyKey " + idempotencyKey);
-    }
     orderRepo.save(new Order(UUID.randomUUID(), order));
   }
   // TODO risk of storing this in-memory? ....
@@ -33,7 +29,6 @@ public class IdempotencyDemo {
   @PutMapping("orders/{uuid}")
   public void byClientPK(@PathVariable UUID uuid, @RequestBody String order) {
     // TODO
-    orderRepo.save(new Order(uuid, order));
   }
 
   // ==== Option 3: window of recent requests payloads (hashed) ====
@@ -42,11 +37,6 @@ public class IdempotencyDemo {
   @PostMapping("orders")
   public void byContentHashing(@RequestBody String order) {
     // TODO
-    HashCode contentHash = Hashing.sha512().hashBytes(order.getBytes());
-    boolean hashAlreadyReceived = recentContentsHashes.add(contentHash);
-    if (!hashAlreadyReceived) {
-      throw new RuntimeException("Duplicated request with same content");
-    }
     orderRepo.save(new Order(UUID.randomUUID(), order));
   }
 
