@@ -47,5 +47,6 @@ public class RateLimiterDemoTest {
     assertThatThrownBy(()->rateLimiterDemo.rateLimiter("tenant1"));
     Thread.sleep(1100);
     assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
+    assertThat(rateLimiterDemo.rateLimiter("tenant1")).isEqualTo("OK");
   }
 }
