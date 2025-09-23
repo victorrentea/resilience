@@ -37,7 +37,7 @@ public class BulkheadDemo {
     // - client-api-key from SecurityContextHolder.getContext().getAuthentication().getName();
     // - requestDto.region, ...
     if (tenantId == null) {
-      tenantId = ""+new Random().nextInt(2);
+      tenantId = "" + new Random().nextInt(2); // Demo
     }
 
     return bulkheadRegistry.bulkhead("bulkhead-" + tenantId)

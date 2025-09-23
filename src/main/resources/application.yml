@@ -4,9 +4,12 @@ management.endpoint.health.show-details: always
 
 resilience4j:
   ratelimiter: # props of: io.github.resilience4j.common.ratelimiter.configuration.CommonRateLimiterConfigurationProperties.InstanceProperties
-#    instances:
-#      rate1:
+    instances:
+      rate1:
         # TODO customize for 'rate1' ratelimiter
+        limit-for-period: 3 # number of calls
+        limit-refresh-period: 1m # .. per unit of time
+        timeout-duration: 1s # how much to block additional calling thread until exception
     configs:
       default: #default for any new rate limiter
         limit-for-period: 200 # number of calls
@@ -16,12 +19,14 @@ resilience4j:
   bulkhead: # props of: io.github.resilience4j.common.bulkhead.configuration.CommonBulkheadConfigurationProperties.InstanceProperties
     configs:
       default: # default for any bulkhead
+        # TODO
         max-concurrent-calls: 2
         max-wait-duration: 0ms # how much to allow calls to wait in line
 
   retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
     instances:
       retry1:
+        # TODO
         max-attempts: 3
         wait-duration: 100ms
         retry-exceptions:
@@ -32,6 +37,7 @@ resilience4j:
   circuitbreaker: # props of: io.github.resilience4j.common.circuitbreaker.configuration.CommonCircuitBreakerConfigurationProperties.InstanceProperties
     instances:
       circuit1:
+        # TODO
         sliding-window-size: 5
         sliding-window-type: time_based #seconds
 
