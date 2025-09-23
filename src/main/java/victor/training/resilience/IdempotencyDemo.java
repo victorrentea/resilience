@@ -19,7 +19,7 @@ public class IdempotencyDemo {
   public void byIdempotencyHeader(
       @RequestHeader("X-Idempotency-Key") String idempotencyKey,
       @RequestBody String order) {
-    // TODO
+    // TODO only process request with new idempotency key
     boolean ikAlreadyReceived = recentIdempotencyKeys.add(idempotencyKey);
     if (!ikAlreadyReceived) {
       throw new RuntimeException("Duplicated request with same idempotencyKey " + idempotencyKey);
@@ -32,7 +32,7 @@ public class IdempotencyDemo {
   // ==== Option 2: Client-generated PK ====
   @PutMapping("orders/{uuid}")
   public void byClientPK(@PathVariable UUID uuid, @RequestBody String order) {
-    // TODO
+    // TODO use client-provided UUID as PK for the order
     orderRepo.save(new Order(uuid, order));
   }
 
@@ -41,7 +41,7 @@ public class IdempotencyDemo {
 
   @PostMapping("orders")
   public void byContentHashing(@RequestBody String order) {
-    // TODO
+    // TODO only process request with new Hashing.sha512().hashBytes(order.getBytes())
     HashCode contentHash = Hashing.sha512().hashBytes(order.getBytes());
     boolean hashAlreadyReceived = recentContentsHashes.add(contentHash);
     if (!hashAlreadyReceived) {
