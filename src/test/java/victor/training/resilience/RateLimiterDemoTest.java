@@ -20,13 +20,13 @@ public class RateLimiterDemoTest {
 
   @Test // TODO default rate limiter of 3 req/min
   void global() throws InterruptedException {
-    assertThat(rateLimited.global()).isEqualTo("OK");
-    assertThat(rateLimited.global()).isEqualTo("OK");
-    assertThat(rateLimited.global()).isEqualTo("OK");
-    assertThatThrownBy(()-> rateLimited.global()).describedAs("call blocked");
+    assertThat(rateLimited.rateFp()).isEqualTo("OK");
+    assertThat(rateLimited.rateFp()).isEqualTo("OK");
+    assertThat(rateLimited.rateFp()).isEqualTo("OK");
+    assertThatThrownBy(()-> rateLimited.rateFp()).describedAs("call blocked");
 
     Thread.sleep(1100); // but after a while
-    assertThat(rateLimited.global()).isEqualTo("OK");
+    assertThat(rateLimited.rateFp()).isEqualTo("OK");
   }
 
   @Test // TODO for tenant ABC, rate limit to 2 req/min

@@ -1,6 +1,7 @@
 
 package victor.training.resilience;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.micrometer.observation.annotation.Observed;
@@ -36,7 +37,7 @@ public class RetryDemo {
   @GetMapping("retry-fp")
   public String retryFP() { // #2 FP, less magic
     return retryRegistry.retry("retry1")
-        .executeSupplier(this::performCall);
+        .executeSupplier(() -> performCall());
   }
 
   private final AtomicInteger counter = new AtomicInteger(1);

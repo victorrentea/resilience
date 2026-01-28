@@ -21,20 +21,22 @@ public class RateLimiterDemo {
 
   @GetMapping("rate")
   @RateLimiter(name="rate1")
-  public String rateLimiterAOP() { // AOP alternative
+  public String rateAop() { // #1 AOP (via a proxy)
     return rateLimitedLogic.logic();
   }
 
   @GetMapping("rate-fp")
-  public String global() {
+  public String rateFp() { // #2 FP
     return rateLimiterRegistry.rateLimiter("rate1")
-        .executeSupplier(rateLimitedLogic::logic);
+        .executeSupplier(() -> rateLimitedLogic.logic());
   }
 
   @GetMapping("rate-per-tenant")
   public String perTenant(@RequestHeader String tenantId) {
-    return rateLimiterRegistry.rateLimiter("rate-"+tenantId)
+    return rateLimiterRegistry
+        .rateLimiter("rate-tenant-"+tenantId)
         .executeSupplier(rateLimitedLogic::logic);
+    // Distributed alternative: https://github.com/bucket4j/bucket4j
   }
   @PostConstruct
   public void init() {

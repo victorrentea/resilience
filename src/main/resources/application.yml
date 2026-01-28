@@ -2,52 +2,57 @@
 management.endpoints.web.exposure.include: "*"
 management.endpoint.health.show-details: always
 
-resilience4j:
-  ratelimiter: # props of: io.github.resilience4j.common.ratelimiter.configuration.CommonRateLimiterConfigurationProperties.InstanceProperties
-    instances:
-      rate-ABC: # 3 / s
-        limit-for-period: 2
-        limit-refresh-period: 1s
-    configs: # 2 / s
-      default: #default for any new rate limiter (used by tenant-based rate limiting)
-        limit-for-period: 3 # number of calls
-        limit-refresh-period: 1s # .. per unit of time
-        timeout-duration: 0s # how much to block additional calling thread until exception
-
-  bulkhead: # props of: io.github.resilience4j.common.bulkhead.configuration.CommonBulkheadConfigurationProperties.InstanceProperties
-    configs:
-      default: # default for any bulkhead
-        # TODO
-        max-concurrent-calls: 2
-        max-wait-duration: 0ms # how much to allow calls to wait in line
-
-  retry: # props of: io.github.resilience4j.common.retry.configuration.CommonRetryConfigurationProperties.InstanceProperties
+resilience4j: # former Hystrix (RIP)️
+  retry:
     instances:
       retry1:
-        # TODO
         max-attempts: 3
         wait-duration: 100ms
+        # exponential-backoff-multiplier: 1.2
         retry-exceptions:
           - org.springframework.web.client.HttpServerErrorException.InternalServerError
-         # or, custom predicate
-#        retry-exception-predicate: victor.training.resilience.RetryDemo.RetryPredicate
+    #        retry-exception-predicate: victor.training.resilience.RetryDemo.RetryPredicate
 
-  circuitbreaker: # props of: io.github.resilience4j.common.circuitbreaker.configuration.CommonCircuitBreakerConfigurationProperties.InstanceProperties
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 3 # max number of calls per
+        limit-refresh-period: 1s
+        timeout-duration: 0s # max time a call can wait to enter (0 = throw immediately if full)
+    instances:
+      rate1:
+        limit-for-period: 2
+      rate-tenant-42: # larger rps for tenant 42
+        limit-for-period: 10
+
+  bulkhead:
+    configs:
+      default:
+        max-concurrent-calls: 1
+        max-wait-duration: 0ms # max time a call can wait to enter (0 = throw immediately if full)
+      bulkhead1:
+        max-concurrent-calls: 199 # don't saturate all HTTP threads
+
+  circuitbreaker:
     instances:
       circuit1:
-        # TODO
+        # over the last 5 seconds
         sliding-window-size: 5
-        sliding-window-type: time_based #seconds
+        sliding-window-type: time_based
 
-        slow-call-duration-threshold: 2s # resp time >
-        slow-call-rate-threshold: 90 # 90%
+        failure-rate-threshold: 99 # % failed❌
 
-        failure-rate-threshold: 99 # % failed => sare siguranta
+        # or slow calls:
+        slow-call-rate-threshold: 90 # % finish in more than
+        slow-call-duration-threshold: 2s
 
+        # pause calls for 2s
+        wait-duration-in-open-state: 2s
 
-        wait-duration-in-open-state: 2s # sarita 2 sec
+        # then send a few test calls:
+        permitted-number-of-calls-in-half-open-state: 2
 
-        permitted-number-of-calls-in-half-open-state: 2 # 2 calls can try out the remote
+        # and if they are OK, close the circuit (allow all calls)
 
 spring:
   cache:
@@ -59,3 +64,13 @@ logging:
     dateformat: "HH:mm:ss.SSS"
 
 target.url.base: http://localhost:8080
+#server:
+#  tomcat:
+#    max-connections: 50000
+#server:
+#  tomcat:
+#    accept-count: 50
+#server:
+#  tomcat:
+#    threads:
+#      max: 2000
