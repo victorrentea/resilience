@@ -19,6 +19,7 @@ resilience4j: # former Hystrix (RIP)️
         limit-for-period: 3 # max number of calls per
         limit-refresh-period: 1s
         timeout-duration: 0s # max time a call can wait to enter (0 = throw immediately if full)
+#        timeout-duration: 500ms # = i hope in  0.5s I regain the permission to call
     instances:
       rate1:
         limit-for-period: 2
@@ -46,13 +47,13 @@ resilience4j: # former Hystrix (RIP)️
         slow-call-rate-threshold: 90 # % finish in more than
         slow-call-duration-threshold: 2s
 
-        # pause calls for 2s
+        # pause calls = open circuit🛑 for 2s
         wait-duration-in-open-state: 2s
 
         # then send a few test calls:
         permitted-number-of-calls-in-half-open-state: 2
 
-        # and if they are OK, close the circuit (allow all calls)
+        # and if they return OK, close✅ the circuit (allow all calls)
 
 spring:
   cache:
